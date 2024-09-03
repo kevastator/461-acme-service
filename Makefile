@@ -4,27 +4,29 @@ SRCDIR := src
 
 # Rule to compile/run the TypeScript file
 build-%:
-  @ echo "Building $*..."
-  @ tsc --outDir $(OUTDIR) $(SRCDIR)/$*
+	@ echo "Building $*..."
+	@ npx tsc
 
 run-%:
-  @ echo "Running $*..."
-  @ node $(OUTDIR)/$(basename $*).js
+	@ echo "Running $*..."
+	@ node $(OUTDIR)/$(basename $*).js
 
 # Clean rule to remove the output directory
 clean:
 ifeq ($(OS), Windows_NT)
-  @ rmdir /S $(OUTDIR)
+	@ rmdir /S $(OUTDIR)
 else
-  @ rm -r $(OUTDIR)
+	@ rm -r $(OUTDIR)
 endif
 
+install:
+	@ npm install --save-dev
 # Special rule to handle compiling and running a specified file
 %:
-  @ $(MAKE) -s build-$*
-  @ $(MAKE) -s run-$*
+	@ $(MAKE) -s build-$*
+	@ $(MAKE) -s run-$*
 
-.PHONY: clean
+.PHONY: clean install
 
 # //////////////////////////////////
 #     HOW TO USE THE MAKEFILE
@@ -40,3 +42,5 @@ endif
 #    make test.ts
 # Remove all compiled TypeScript files (USE CAREFULLY)
 #    make clean
+# Install all dependencies
+#    make install
