@@ -1,21 +1,30 @@
-# Variable for the output directory
-OUTDIR := ./js_out
+# Variable for the I/O directories
+OUTDIR := dist
+SRCDIR := src
 
 # Rule to compile/run the TypeScript file
 build-%:
-  tsc --rootDir ./ --outDir $(OUTDIR) $*
+  @ echo "Building $*..."
+  @ tsc --outDir $(OUTDIR) $(SRCDIR)/$*
 
 run-%:
-  node $(OUTDIR)/$(basename $*).js
+  @ echo "Running $*..."
+  @ node $(OUTDIR)/$(basename $*).js
 
 # Clean rule to remove the output directory
 clean:
-  rm -rf $(OUTDIR)
+ifeq ($(OS), Windows_NT)
+  @ rmdir /S $(OUTDIR)
+else
+  @ rm -r $(OUTDIR)
+endif
 
 # Special rule to handle compiling and running a specified file
 %:
-  $(MAKE) build-$*
-  $(MAKE) run-$*
+  @ $(MAKE) -s build-$*
+  @ $(MAKE) -s run-$*
+
+.PHONY: clean
 
 # //////////////////////////////////
 #     HOW TO USE THE MAKEFILE
@@ -23,13 +32,11 @@ clean:
 # "node" and "tsc" commands need to be downloaded in order for this makefile to work!!
 # NOTE : Assume the desired TypeScript file is called test.ts for the following:
 #
-# 1. Changing "js_out" in the OUTDIR variable declaration will create a folder inside the working
-#    directory with the name given to OUTDIR. This will be the folder that contains all of the compiled
-#    TypeScript files.
-# 2. Typing "make build-test.ts" will create a compiled TypeScript file (now Javascript) and place that
-#    in the specified folder (declared in 1).
-# 3. Typing "make run-test.ts" (make run-test.js and make run-test will ALSO work) will simply run the
-#    compiled JavaScript file in the compiled file folder (this ONLY works if the corresponding TypeScript
-#    file was compiled FIRST).
-# 4. To make things easy typing "make test" will compile the test.ts file AND run the corresponding compiled
-#    file.
+# Compile TypeScript file (compiled file -> dist folder)
+#    make build-test.ts
+# Run compiled TypeScript file
+#    make run-test.ts
+# Compile and Run TypeScript file (file extension isn't needed... make test works)
+#    make test.ts
+# Remove all compiled TypeScript files (USE CAREFULLY)
+#    make clean
