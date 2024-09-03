@@ -5,7 +5,7 @@ SRCDIR := src
 # Rule to compile/run the TypeScript file
 build-%:
 	@ echo "Building $*..."
-	@ npx tsc --allowSyntheticDefaultImports true --outDir $(OUTDIR) $(SRCDIR)/$*
+	@ npx tsc
 
 run-%:
 	@ echo "Running $*..."
@@ -42,3 +42,5 @@ install:
 #    make test.ts
 # Remove all compiled TypeScript files (USE CAREFULLY)
 #    make clean
+# Install all dependencies
+#    make install
