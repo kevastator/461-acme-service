@@ -19,6 +19,10 @@ else
 	@ rm -r $(OUTDIR)
 endif
 
+ramp_up:
+	# @ cd node_modules/halstead-metrics-cli && (npx halstead dir ../../dist | grep "Time required to program (h)" | sed 's/.*(h).............//') && cd ../../
+	# cd node_modules/halstead-metrics-cli && (npx halstead dir ../../dist) && cd ../../
+
 install:
 	@ npm install --save-dev
 # Special rule to handle compiling and running a specified file
@@ -26,7 +30,7 @@ install:
 	@ $(MAKE) -s build-$*
 	@ $(MAKE) -s run-$*
 
-.PHONY: clean install
+.PHONY: clean install ramp_up
 
 # //////////////////////////////////
 #     HOW TO USE THE MAKEFILE
