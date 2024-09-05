@@ -2,6 +2,7 @@
   "devDependencies": {
     "@types/node": "^22.5.2",
     "dotenv": "^16.4.5",
+    "halstead-metrics-cli": "^1.0.8",
     "typescript": "^5.5.4"
   }
 }
