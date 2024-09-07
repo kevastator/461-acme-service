@@ -9,6 +9,7 @@ interface Config
     LOG_FILE: string;
 }
 
+// Create a constant to be used globally, simple config object can be easily accessable across all other scripts
 const config: Config = {
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     LOG_LEVEL: Number(process.env.LOG_LEVEL),
