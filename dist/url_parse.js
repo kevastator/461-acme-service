@@ -33,7 +33,7 @@ async function parseURL(url) {
             // just like a github link check to see if the index exists
             if (gitIdx > -1) // NPM link hosts github
              {
-                return [splitStr[gitIdx + 1], splitStr[gitIdx + 2]]; // return owner and repo name
+                return [splitStr[gitIdx + 1], splitStr[gitIdx + 2].replace(".git", "")]; // return owner and repo name
             }
         }
         return ["", ""]; // ERROR INVALID LINK

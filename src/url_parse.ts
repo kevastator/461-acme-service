@@ -24,8 +24,6 @@ export async function parseURL(url: string): Promise<string[]>
             // get the hosting url for the repository
             repoUrl = data?.repository?.url;
 
-            console.log(repoUrl);
-
             // split the new repo url
             splitStr = repoUrl.split("/");
 
@@ -41,7 +39,7 @@ export async function parseURL(url: string): Promise<string[]>
             // just like a github link check to see if the index exists
             if (gitIdx > -1) // NPM link hosts github
             {
-                return [splitStr[gitIdx + 1], splitStr[gitIdx + 2]]; // return owner and repo name
+                return [splitStr[gitIdx + 1], splitStr[gitIdx + 2].replace(".git", "")]; // return owner and repo name with removed .git
             }
         }
 
