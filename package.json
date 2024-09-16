@@ -4,5 +4,15 @@
     "dotenv": "^16.4.5",
     "halstead-metrics-cli": "^1.0.8",
     "typescript": "^5.5.4"
-  }
+  },
+  "name": "461-acme-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
