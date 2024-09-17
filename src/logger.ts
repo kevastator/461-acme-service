@@ -5,6 +5,7 @@ import * as fs from 'fs';
 // Simple enum to specify the level of verbosity the program wishes to write to
 enum VerbosityType
 {
+    SILENT = 0,
     INFO = 1,
     DEBUG = 2
 }
@@ -20,7 +21,7 @@ class Logger {
     private printLog(message: string, verbosity_type: VerbosityType = VerbosityType.INFO)
     {
         // Check if the verbosity type is valid according to the .env file
-        if (verbosity_type == config.LOG_LEVEL)
+        if (verbosity_type == config.LOG_LEVEL && config.LOG_LEVEL != 0)
         {
             let testDirectory: string = path.dirname(config.LOG_FILE); // extract the directory from the logfile path
             
@@ -55,6 +56,11 @@ class Logger {
         this.printLog(message, VerbosityType.INFO);
     }
 
+    // For console info and debug messages
+    public infoDebug(message: string)
+    {
+        this.printLog(message, config.LOG_LEVEL);
+    }
 }
 
 // Export our logger for use in other modules
