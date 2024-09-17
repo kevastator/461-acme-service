@@ -21,8 +21,6 @@ export async function getBusFactor(owner: string, repoName: string): Promise<num
                         login
                     }
                     }
-                    additions
-                    deletions
                 }
                 }
             }
