@@ -1,6 +1,6 @@
 import config from "./config_env";
 
-export async function graphqlRequest(query: string): Promise<JSON>
+export async function graphqlRequest(query: string)
 {
     // We fetch using post method
     const response = await fetch("https://api.github.com/graphql", {
@@ -10,14 +10,16 @@ export async function graphqlRequest(query: string): Promise<JSON>
     });
 
     // Get our response
-    const { data, errors } = await response.json();
+    const responseJson = await response.json();
+
+    const errors = responseJson?.errors;
 
     if (response.ok)
     {
         // Return the data if there is no error
         if (errors == undefined)
         {
-            return data;
+            return responseJson;
         }
         else // if there is an error reject the request with the errors
         {
@@ -32,13 +34,13 @@ export async function graphqlRequest(query: string): Promise<JSON>
 }
 
 // EXAMPLE REQUEST (type query in raw string):
-graphqlRequest(`
-query {
-    viewer { login }
-    }
-`).then((data) => sayName(data)); // use this notation to pass the data after the data is retrieved
+// graphqlRequest(`
+// query {
+//     viewer { login }
+//     }
+// `).then((data) => sayName(data)); // use this notation to pass the data after the data is retrieved
 
-function sayName(data: any)
-{
-    console.log(data?.viewer?.login); // accessing properties in example function
-}
+// function sayName(data: any)
+// {
+//     console.log(data?.viewer?.login); // accessing properties in example function
+// }

@@ -13,26 +13,30 @@ async function graphqlRequest(query) {
         body: JSON.stringify({ query: query }) // stringify JSON query
     });
     // Get our response
-    const { data, errors } = await response.json();
+    const responseJson = await response.json();
+    const errors = responseJson === null || responseJson === void 0 ? void 0 : responseJson.errors;
     if (response.ok) {
+        // Return the data if there is no error
         if (errors == undefined) {
-            return data;
+            return responseJson;
         }
-        else {
+        else // if there is an error reject the request with the errors
+         {
             return Promise.reject(errors);
         }
     }
     else {
+        // if the response is not okay reject it and say there was an error
         return Promise.reject("Error failed to get a response from the API");
     }
 }
 // EXAMPLE REQUEST (type query in raw string):
-graphqlRequest(`
-query {
-    viewer { login }
-    }
-`).then((data) => sayName(data)); // use this notation to pass the data after the data is retrieved
-function sayName(data) {
-    var _a;
-    console.log((_a = data === null || data === void 0 ? void 0 : data.viewer) === null || _a === void 0 ? void 0 : _a.login); // accessing properties in example function
-}
+// graphqlRequest(`
+// query {
+//     viewer { login }
+//     }
+// `).then((data) => sayName(data)); // use this notation to pass the data after the data is retrieved
+// function sayName(data: any)
+// {
+//     console.log(data?.viewer?.login); // accessing properties in example function
+// }
