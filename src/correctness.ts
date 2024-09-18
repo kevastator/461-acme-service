@@ -9,7 +9,7 @@ export async function getCorrectness(owner: string, repoName: string): Promise<n
     // Graph QL query
     const query = `
     query {
-    search(query: "repo:${owner}/${repoName} label:bug last:100", type: ISSUE) {
+    search(query: "repo:${owner}/${repoName} label:bug", type: ISSUE,  last:100) {
         edges {
         node {
             ... on Issue {
@@ -56,7 +56,7 @@ export async function getCorrectness(owner: string, repoName: string): Promise<n
         "CLOSED": 0
     };  
 
-    logger.debug("Looping through for Correctness calculations...");
+    logger.debug("Looping for Correctness calculations...");
 
     // Check state of each bug
     for (var i = 0; i < edges.length; i++) {
