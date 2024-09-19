@@ -65,7 +65,10 @@ export async function getCorrectness(owner: string, repoName: string): Promise<n
     }
 
     // Calculate the correctness
-    var score = dict["CLOSED"] / (dict["OPEN"] + dict["CLOSED"]);
+    var score = 0;
+    if (dict["CLOSED"] > 0) {
+        score = dict["CLOSED"] / (dict["OPEN"] + dict["CLOSED"]);
+    }
 
     // get the elapsed time in seconds (divide by 1000)
     var elapsed_time:number = (new Date().getTime() - start) / 1000;
