@@ -32,6 +32,41 @@ export async function getLicense(owner: string, repoName: string): Promise<numbe
     {
         score = 1;
     }
+    else // If license is undefined or something else search through the markdown file
+    {
+        logger.debug(`No Clear GraphQL License found for ${owner}/${repoName}, searching the markdown`);
+        // Get the markdown file from the repo master branch
+        var responseMd = await fetch(`https://raw.githubusercontent.com/${owner}/${repoName}/master/README.md`);
+
+        // If it is not ok assume it does not exist and return zero and the latency
+        if (!responseMd.ok)
+        {
+            var elapsed_time:number = (new Date().getTime() - start) / 1000;
+
+            logger.debug(`No README for alternative license could be found on the web for ${owner}/${repoName}!`);
+
+            return [score, elapsed_time];
+        }
+
+        // Else we extract the markdown file
+        var markdown: string = await responseMd.text();
+
+        // Split based on license header
+        var searchArr: string[] = markdown.split("# License");
+        var searchString: string = "";
+
+        // If the header is found (the split array is bigger than 1) set the search string
+        if (searchArr.length > 1)
+        {
+            searchString = searchArr[1].split("##")[0];
+        }
+
+        // If the search string has any license indications, set the score to 1!
+        if ((searchString.includes("MIT") || searchString.includes("LGPL-2.1") || searchString.includes("BSD-3-Clause")))
+        {
+            score = 1;
+        }
+    }
 
     // get the elapsed time in seconds (divide by 1000)
     var elapsed_time:number = (new Date().getTime() - start) / 1000;
