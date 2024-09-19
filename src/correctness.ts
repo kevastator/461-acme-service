@@ -66,7 +66,7 @@ export async function getCorrectness(owner: string, repoName: string): Promise<n
 
     // Calculate the correctness
     var score = 0;
-    if (dict["CLOSED"] > 0) {
+    if ((dict["CLOSED"] + dict["OPEN"]) > 0) {
         score = dict["CLOSED"] / (dict["OPEN"] + dict["CLOSED"]);
     }
 
