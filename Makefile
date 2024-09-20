@@ -22,12 +22,6 @@ endif
 install:
 	@ npm install --save-dev
 
-url_metrics:
-	@ echo "Building URL Parser..."
-	@ npx tsc
-	@ echo "Calculating URL Metrics..."
-	@ node $(OUTDIR)/url_metrics.js $(URL_FILEPATH)
-
 # Special rule to handle compiling and running a specified file
 %:
 	@ $(MAKE) -s build-$*
