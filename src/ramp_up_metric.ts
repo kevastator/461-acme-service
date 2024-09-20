@@ -1,55 +1,121 @@
-import { execSync } from 'child_process';
+import * as fs from 'fs';
+import * as path from 'path';
+import { parse } from 'acorn';
+import { simple as walkSimple } from 'acorn-walk';
 
-// Function to run shell commands and capture the output
-function runCommand(command: string): string {
-    try {
-        return execSync(command).toString().trim();
-    } catch (error) {
-        console.error("Error executing command:", error);
-        return '';
-    }
+interface HalsteadMetrics {
+    eta1: number; // Number of distinct operators
+    eta2: number; // Number of distinct operands
+    N1: number;   // Total number of operators
+    N2: number;   // Total number of operands
 }
 
-// Function to calculate normalized time based on halstead metrics
-function calculateRampUpTime(directory: string): number {
-    // Navigate to node_modules/halstead-metrics-cli directory
-    process.chdir('node_modules/halstead-metrics-cli');
-    // Get the output from halstead-metrics-cli
-    const halsteadOutput = runCommand(`npx halstead dir ../../${directory}`);
-    // Extract the time required to program in hours from the output
-    const timeMatch = halsteadOutput.match(/Time required to program \(h\).*[\d.\d]/);
+// Operators and operands tracking
+function calculateMetrics(content: string): HalsteadMetrics {
+    const operatorsSet = new Set<string>();
+    const operandsSet = new Set<string>();
+    let N1 = 0; // Total operators count
+    let N2 = 0; // Total operands count
 
-    if (!timeMatch) {
-        console.error("Unable to find the time in halstead-metrics-cli output");
-        return 0;
-    }
-    else {
-        const timeMatchStr = timeMatch[0];
-        const timeStr = timeMatchStr.match(/\d+.\d+/);
-        if (!timeStr) {
-            console.error("Unable to parse time from halstead-metrics-cli output")
-            return 0;
-        } else {
-            const time = parseFloat(timeStr[0]);
-            const TIME_LIMIT = 100; // Time limit in hours
+    const ast = parse(content, { ecmaVersion: 'latest' });
 
-            // Check if the time exceeds the limit
-            if (time > TIME_LIMIT) {
-                return 0;
-            } else {
-                // Normalize the time
-                const normalizedTime = 1 - time / TIME_LIMIT;
-                return normalizedTime;
-            }
+    walkSimple(ast, {
+        // Operators (arithmetic, logical, assignment, etc.)
+        BinaryExpression(node) {
+            operatorsSet.add(node.operator);
+            N1++; // Counting operators
+        },
+        UnaryExpression(node) {
+            operatorsSet.add(node.operator);
+            N1++;
+        },
+        LogicalExpression(node) {
+            operatorsSet.add(node.operator);
+            N1++;
+        },
+        AssignmentExpression(node) {
+            operatorsSet.add(node.operator);
+            N1++;
+        },
+        // Operands (identifiers, literals)
+        Identifier(node) {
+            operandsSet.add(node.name);
+            N2++; // Counting operands
+        },
+        Literal(node) {
+            operandsSet.add(String(node.value));
+            N2++;
         }
-        
-    }
+    });
+
+    return {
+        eta1: operatorsSet.size, // Number of distinct operators
+        eta2: operandsSet.size,  // Number of distinct operands
+        N1,                      // Total number of operators
+        N2                       // Total number of operands
+    };
 }
 
-// Main function to run the ramp up time calculation
-export function main(directory: string): number {
-    const result = calculateRampUpTime(directory);
-    // Navigate back to the root directory
-    process.chdir('../../');
-    return result;
+function calculateTimeToProgram(metrics: HalsteadMetrics): number {
+    const { eta1, eta2, N1, N2 } = metrics;
+
+    // Program vocabulary: η = η1 + η2
+    const eta = eta1 + eta2;
+
+    // Program length: N = N1 + N2
+    const N = N1 + N2;
+
+    // Calculated estimated program length: N^ = η1 * log2(η1) + η2 * log2(η2)
+    const estimatedN = eta1 * Math.log2(eta1 || 1) + eta2 * Math.log2(eta2 || 1);
+
+    // Volume: V = N * log2(η)
+    const volume = N * Math.log2(eta || 1);
+
+    // Difficulty: D = (η1 / 2) * (N2 / η2)
+    const difficulty = (eta1 / 2) * (N2 / (eta2 || 1));
+
+    // Effort: E = D * V
+    const effort = difficulty * volume;
+
+    // Time to program: T = E / 18 (in seconds) -> 1 / 3600 (in hours)
+    const timeToProgram = effort / (18 * 3600);
+
+    return timeToProgram;
+}
+
+function getJavaScriptFiles(dir: string): string[] {
+    let files: string[] = [];
+
+    fs.readdirSync(dir).forEach(file => {
+        const filePath = path.join(dir, file);
+        if (fs.statSync(filePath).isDirectory()) {
+            files = files.concat(getJavaScriptFiles(filePath));
+        } else if (filePath.endsWith('.js')) {
+            files.push(filePath);
+        }
+    });
+
+    return files;
+}
+
+// Main function that calculates the normalized time and returns the appropriate result
+export function calculateTotalTime(directory: string): number {
+    const time_max = 100;  // Locally defined time_max
+
+    const jsFiles = getJavaScriptFiles(directory);
+    let totalTime = 0;
+
+    jsFiles.forEach(filePath => {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const metrics = calculateMetrics(content);
+        const time = calculateTimeToProgram(metrics);
+        totalTime += time;
+    });
+
+    // Return 0 if totalTime exceeds time_max, otherwise return 1 - (totalTime / time_max)
+    if (totalTime > time_max) {
+        return 0;
+    } else {
+        return 1 - totalTime / time_max;
+    }
 }
