@@ -5,8 +5,8 @@ import logger from './logger';  // Import the logger
 import { parseURL } from './url_parse'; //parsing github and npm urls
 import { getBusFactor } from './bus_factor'; //imports metric for calculating bus factor
 import { getCorrectness } from './correctness';  // imports metric for calculating correctness
-import { getRampUp } from './ramp_up'; // imports metric for calculating correctness
-import { getResponsiveMaintainer } from './responsive_maintainer'; // imports metric for calculating responsive maintainance
+import { calculateTotalTimeFromRepo } from './ramp_up_metric'; // imports metric for calculating correctness
+import { getResponsive } from './responsive_maintainer'; // imports metric for calculating responsive maintainance
 import { getLicense } from './license'; // imports metric for determining license compatibility
 
 // Create a readline interface for interactive input
@@ -58,11 +58,12 @@ const analyzeRepository = async (repoUrl: string) => {
 
         // Ramp-Up 
         logger.debug(`Calculating Ramp-Up Time for ${owner}/${repo}`);
-        const [rampUp, rampUpLatency] = await getRampUp(owner, repo);
+        const rampUp = calculateTotalTimeFromRepo(`https://github.com/${owner}/${repo}`);
+        const rampUpLatency = 0; // Placeholder if no latency is calculated
 
         // Responsive Maintainer
         logger.debug(`Calculating Responsive Maintainer Score for ${owner}/${repo}`);
-        const [responsiveMaintainer, responsiveMaintainerLatency] = await getResponsiveMaintainer(owner, repo);
+        const [responsiveMaintainer, responsiveMaintainerLatency] = await getResponsive(owner, repo);
 
         // License Compatibility
         logger.debug(`Checking License Compatibility for ${owner}/${repo}`);
@@ -98,7 +99,11 @@ const analyzeRepository = async (repoUrl: string) => {
 
     } catch (error) {
         // Log the error
-        logger.info(`Failed to analyze repository: ${repoUrl}. Error: ${error.message}`);
+        if (error instanceof Error) {
+            logger.info(`Failed to analyze repository: ${repoUrl}. Error: ${error.message}`);
+        } else {
+            logger.info(`Failed to analyze repository: ${repoUrl}. An unknown error occurred.`);
+        }  
     }
 };
 
