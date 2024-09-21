@@ -1,68 +1,75 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import Decimal from 'decimal.js';
+import { graphqlRequest } from "./graphql_request";
+import logger from "./logger";
 
-// Function to read commit data from a file
-function readCommitData(filepath: string): [string[], string[]] {
-    const data = fs.readFileSync(filepath, 'utf8');
-    const lines = data.split('\n');
-    const dates: string[] = [];
-    const timeStamps: string[] = [];
+export async function getResponsive(owner: string, repoName: string): Promise<number> {
+    // Record the start time
+    var start: number = new Date().getTime();
 
-    for(const line of lines){
-        const parts = line.trim().split(' ');
-        if(parts.length >= 3){
-            const cleanDates = parts[1].replace(/\x00/g, '').trim();
-            const cleanTime = parts[2].replace(/\x00/g, '').trim();
-            dates.push(cleanDates);
-            timeStamps.push(cleanTime);
+    // GraphQL query to get commit timestamps
+    const query = `
+    query {
+        repository(owner: "${owner}", name: "${repoName}") {
+            defaultBranchRef {
+                target {
+                    ... on Commit {
+                        history(first: 100) {
+                            edges {
+                                node {
+                                    committedDate
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    `;
+
+    // Use async call to get the GraphQL response
+    logger.debug("Calling GraphQL for commit timestamps");
+    var response = await graphqlRequest(query);
+
+    // Extract edges containing commit information
+    var edges = response?.data?.repository?.defaultBranchRef?.target?.history?.edges;
+
+    if (!edges || edges.length < 2) {
+        logger.debug("Not enough commit data to calculate average time between commits");
+        return 0;  // Return 0 if there's not enough data
+    }
+
+    // Convert commit dates to timestamps and store in an array
+    var commitTimestamps: number[] = [];
+    for (var i = 0; i < edges.length; i++) {
+        var committedDate: string = edges[i]?.node?.committedDate;
+        if (committedDate) {
+            commitTimestamps.push(new Date(committedDate).getTime());
         }
     }
 
-    return [dates, timeStamps]
+    // Sort timestamps in ascending order
+    commitTimestamps.sort((a, b) => a - b);
 
-}
-
-const [dates, times] = readCommitData('commits.txt');
-//console.log('Dates:', dates);
-//console.log('Times:', times);
-
-function calculateTimeDifferences(dates: string[], times: string[]): number[] {
-    const timeDifferences: number[] = [];
-  
-    for (let i = 1; i < dates.length; i++) {
-        const previousDateTime = new Date(`${dates[i - 1]}T${times[i - 1]}`);
-        const currentDateTime = new Date(`${dates[i]}T${times[i]}`);
-      
-        const diffMilliseconds = currentDateTime.getTime() - previousDateTime.getTime();
-      
-        const diffMinutes = Math.floor(diffMilliseconds / 1000 / 60);
-        timeDifferences.push(Math.abs(diffMinutes)); // in minutes
-    }
-  
-    return timeDifferences;
-}
-  
-const differences = calculateTimeDifferences(dates, times);
-//console.log(differences);
-
-function calculateAverageTime(differences: number[]): number {
-    if(differences.length === 0){
-        return 0;
+    // Calculate differences between consecutive commits
+    var timeDifferences: number[] = [];
+    for (var i = 1; i < commitTimestamps.length; i++) {
+        var timeDiff = (commitTimestamps[i] - commitTimestamps[i - 1]) / 1000; // in seconds
+        timeDifferences.push(timeDiff);
     }
 
-    let totalTime: number = 0;
-    let averageTime: number = 0;
+    // Calculate average time difference in seconds
+    var totalDiff = timeDifferences.reduce((acc, val) => acc + val, 0);
+    var avgTimeBetweenCommitsInSeconds = totalDiff / timeDifferences.length;
 
-    for(let i = 1; i < differences.length; i++){
-        totalTime += (differences[i] / 60) // calculates in hours
-    }
+    // Convert average time difference to hours
+    var avgTimeBetweenCommitsInHours = avgTimeBetweenCommitsInSeconds / 3600; // 1 hour = 3600 seconds
 
-    averageTime = totalTime / differences.length;
+    // Get the elapsed time in seconds (divide by 1000)
+    var elapsed_time: number = (new Date().getTime() - start) / 1000;
 
-    return averageTime;
+    logger.infoDebug(`Successfully calculated average time between commits: ${avgTimeBetweenCommitsInHours.toFixed(2)} hours for ${owner}/${repoName} in ${elapsed_time}s`);
+
+    console.log(avgTimeBetweenCommitsInHours);
+    return avgTimeBetweenCommitsInHours;
 }
 
-const avgTime = calculateAverageTime(differences);
-console.log(`${avgTime} hours`);

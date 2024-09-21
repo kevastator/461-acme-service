@@ -1,5 +1,5 @@
 import config from "./config_env"
-import path from "path"
+import * as path from "path"
 import * as fs from 'fs';
 
 // Simple enum to specify the level of verbosity the program wishes to write to
