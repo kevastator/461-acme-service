@@ -1,7 +1,7 @@
 import { graphqlRequest } from "./graphql_request";
 import logger from "./logger";
 
-export async function getResponsive(owner: string, repoName: string): Promise<number> {
+export async function getResponsive(owner: string, repoName: string): Promise<number[]> {
     // Record the start time
     var start: number = new Date().getTime();
 
@@ -70,7 +70,7 @@ export async function getResponsive(owner: string, repoName: string): Promise<nu
     logger.infoDebug(`Successfully calculated average time between commits: ${avgTimeBetweenCommitsInHours.toFixed(2)} hours for ${owner}/${repoName} in ${elapsed_time}s`);
 
     console.log(avgTimeBetweenCommitsInHours);
-    return avgTimeBetweenCommitsInHours;
+    return [avgTimeBetweenCommitsInHours, elapsed_time];
 }
 
 getResponsive("expressjs", "express");
