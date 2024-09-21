@@ -25,8 +25,6 @@ async function getBusFactor(owner, repoName) {
                         login
                     }
                     }
-                    additions
-                    deletions
                 }
                 }
             }
