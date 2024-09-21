@@ -23,11 +23,34 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.calculateTotalTime = calculateTotalTime;
+exports.calculateTotalTimeFromRepo = calculateTotalTimeFromRepo;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const child_process_1 = require("child_process"); // To execute git commands
 const acorn_1 = require("acorn");
 const acorn_walk_1 = require("acorn-walk");
+// Function to clone a GitHub repository into a directory
+function cloneGitHubRepo(url, targetDir) {
+    // Clone the repository into the target directory with depth 1 to only get the latest commit
+    (0, child_process_1.execSync)(`git clone --depth 1 ${url} ${targetDir}`, { stdio: 'inherit' });
+}
+// Function to delete a directory recursively
+function deleteDirectoryRecursive(dirPath) {
+    if (fs.existsSync(dirPath)) {
+        fs.readdirSync(dirPath).forEach((file) => {
+            const currentPath = path.join(dirPath, file);
+            if (fs.lstatSync(currentPath).isDirectory()) {
+                // Recursively delete sub-directories
+                deleteDirectoryRecursive(currentPath);
+            }
+            else {
+                // Delete file
+                fs.unlinkSync(currentPath);
+            }
+        });
+        fs.rmdirSync(dirPath);
+    }
+}
 // Operators and operands tracking
 function calculateMetrics(content) {
     const operatorsSet = new Set();
@@ -84,7 +107,7 @@ function calculateTimeToProgram(metrics) {
     const difficulty = (eta1 / 2) * (N2 / (eta2 || 1));
     // Effort: E = D * V
     const effort = difficulty * volume;
-    // Time to program: T = E / 18 (in seconds) -> 1 / 3600 (in hours)
+    // Time to program: T = E / (18 * 3600) (in hours)
     const timeToProgram = effort / (18 * 3600);
     return timeToProgram;
 }
@@ -102,21 +125,45 @@ function getJavaScriptFiles(dir) {
     return files;
 }
 // Main function that calculates the normalized time and returns the appropriate result
-function calculateTotalTime(directory) {
+function calculateTotalTimeFromRepo(gitHubUrl) {
+    const targetDir = 'analyze_repo';
     const time_max = 100; // Locally defined time_max
-    const jsFiles = getJavaScriptFiles(directory);
-    let totalTime = 0;
-    jsFiles.forEach(filePath => {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const metrics = calculateMetrics(content);
-        const time = calculateTimeToProgram(metrics);
-        totalTime += time;
-    });
-    // Return 0 if totalTime exceeds time_max, otherwise return 1 - (totalTime / time_max)
-    if (totalTime > time_max) {
-        return 0;
+    // Step 1: Clone the GitHub repository into 'analyze_repo'
+    try {
+        console.log(`Cloning repository from ${gitHubUrl} into ${targetDir}...`);
+        cloneGitHubRepo(gitHubUrl, targetDir);
+        // Step 2: Perform the metric calculations
+        const jsFiles = getJavaScriptFiles(targetDir);
+        let totalTime = 0;
+        jsFiles.forEach(filePath => {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const metrics = calculateMetrics(content);
+            const time = calculateTimeToProgram(metrics);
+            totalTime += time;
+        });
+        // Step 3: Clean up by deleting the cloned repository
+        console.log(`Cleaning up the cloned repository at ${targetDir}...`);
+        deleteDirectoryRecursive(targetDir);
+        console.log(totalTime);
+        // Step 4: Return the result based on totalTime
+        if (totalTime > time_max) {
+            return 0;
+        }
+        else {
+            return 1 - totalTime / time_max;
+        }
     }
-    else {
-        return 1 - totalTime / time_max;
+    catch (error) {
+        console.error('An error occurred:', error);
+        deleteDirectoryRecursive(targetDir); // Ensure cleanup even if an error occurs
+        throw error;
     }
+}
+const gitHubUrl = 'https://github.com/kevastator/461-acme-service.git';
+try { // Run the metric
+    const result = calculateTotalTimeFromRepo(gitHubUrl);
+    console.log(`Calculated metric: ${result}`);
+}
+catch (error) {
+    console.error('Failed to calculate metrics:', error);
 }

@@ -1,13 +1,53 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { execSync } from 'child_process';  // To execute git commands
 import { parse } from 'acorn';
 import { simple as walkSimple } from 'acorn-walk';
+
+/*
+This general setup should work for implementation in CLI
+
+import { calculateTotalTimeFromRepo } from './ramp_up_metric';  // Import the function from this file
+
+const gitHubUrl = 'https://github.com/some-user/some-repo.git';  // Create some GitHub url
+
+try {                                                             // Run the metric
+    const result = calculateTotalTimeFromRepo(gitHubUrl);
+    console.log(`Calculated metric: ${result}`);
+} catch (error) {
+    console.error('Failed to calculate metrics:', error);
+}
+*/
+
 
 interface HalsteadMetrics {
     eta1: number; // Number of distinct operators
     eta2: number; // Number of distinct operands
     N1: number;   // Total number of operators
     N2: number;   // Total number of operands
+}
+
+// Function to clone a GitHub repository into a directory
+function cloneGitHubRepo(url: string, targetDir: string): void {
+    // Clone the repository into the target directory with depth 1 to only get the latest commit
+    execSync(`git clone --depth 1 ${url} ${targetDir}`, { stdio: 'inherit' });
+}
+
+// Function to delete a directory recursively
+function deleteDirectoryRecursive(dirPath: string): void {
+    if (fs.existsSync(dirPath)) {
+        fs.readdirSync(dirPath).forEach((file) => {
+            const currentPath = path.join(dirPath, file);
+            if (fs.lstatSync(currentPath).isDirectory()) {
+                // Recursively delete sub-directories
+                deleteDirectoryRecursive(currentPath);
+            } else {
+                // Delete file
+                fs.unlinkSync(currentPath);
+            }
+        });
+        fs.rmdirSync(dirPath);
+    }
 }
 
 // Operators and operands tracking
@@ -77,7 +117,7 @@ function calculateTimeToProgram(metrics: HalsteadMetrics): number {
     // Effort: E = D * V
     const effort = difficulty * volume;
 
-    // Time to program: T = E / 18 (in seconds) -> 1 / 3600 (in hours)
+    // Time to program: T = E / (18 * 3600) (in hours)
     const timeToProgram = effort / (18 * 3600);
 
     return timeToProgram;
@@ -99,23 +139,40 @@ function getJavaScriptFiles(dir: string): string[] {
 }
 
 // Main function that calculates the normalized time and returns the appropriate result
-export function calculateTotalTime(directory: string): number {
+export function calculateTotalTimeFromRepo(gitHubUrl: string): number {
+    const targetDir = 'analyze_repo';
     const time_max = 100;  // Locally defined time_max
 
-    const jsFiles = getJavaScriptFiles(directory);
-    let totalTime = 0;
+    // Step 1: Clone the GitHub repository into 'analyze_repo'
+    try {
+        console.log(`Cloning repository from ${gitHubUrl} into ${targetDir}...`);
+        cloneGitHubRepo(gitHubUrl, targetDir);
 
-    jsFiles.forEach(filePath => {
-        const content = fs.readFileSync(filePath, 'utf-8');
-        const metrics = calculateMetrics(content);
-        const time = calculateTimeToProgram(metrics);
-        totalTime += time;
-    });
+        // Step 2: Perform the metric calculations
+        const jsFiles = getJavaScriptFiles(targetDir);
+        let totalTime = 0;
 
-    // Return 0 if totalTime exceeds time_max, otherwise return 1 - (totalTime / time_max)
-    if (totalTime > time_max) {
-        return 0;
-    } else {
-        return 1 - totalTime / time_max;
+        jsFiles.forEach(filePath => {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const metrics = calculateMetrics(content);
+            const time = calculateTimeToProgram(metrics);
+            totalTime += time;
+        });
+
+        // Step 3: Clean up by deleting the cloned repository
+        console.log(`Cleaning up the cloned repository at ${targetDir}...`);
+        deleteDirectoryRecursive(targetDir);
+
+        // Step 4: Return the result based on totalTime
+        if (totalTime > time_max) {
+            return 0;
+        } else {
+            return 1 - totalTime / time_max;
+        }
+
+    } catch (error) {
+        console.error('An error occurred:', error);
+        deleteDirectoryRecursive(targetDir);  // Ensure cleanup even if an error occurs
+        throw error;
     }
 }
