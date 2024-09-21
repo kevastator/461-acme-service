@@ -37,7 +37,7 @@ async function getResponsive(owner, repoName) {
     var edges = (_e = (_d = (_c = (_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.repository) === null || _b === void 0 ? void 0 : _b.defaultBranchRef) === null || _c === void 0 ? void 0 : _c.target) === null || _d === void 0 ? void 0 : _d.history) === null || _e === void 0 ? void 0 : _e.edges;
     if (!edges || edges.length < 2) {
         logger_1.default.debug("Not enough commit data to calculate average time between commits");
-        return 0; // Return 0 if there's not enough data
+        return [0, 0]; // Return 0 if there's not enough data
     }
     // Convert commit dates to timestamps and store in an array
     var commitTimestamps = [];
@@ -64,6 +64,6 @@ async function getResponsive(owner, repoName) {
     var elapsed_time = (new Date().getTime() - start) / 1000;
     logger_1.default.infoDebug(`Successfully calculated average time between commits: ${avgTimeBetweenCommitsInHours.toFixed(2)} hours for ${owner}/${repoName} in ${elapsed_time}s`);
     console.log(avgTimeBetweenCommitsInHours);
-    return avgTimeBetweenCommitsInHours;
+    return [avgTimeBetweenCommitsInHours, elapsed_time];
 }
 getResponsive("expressjs", "express");

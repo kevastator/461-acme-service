@@ -35,7 +35,7 @@ export async function getResponsive(owner: string, repoName: string): Promise<nu
 
     if (!edges || edges.length < 2) {
         logger.debug("Not enough commit data to calculate average time between commits");
-        return 0;  // Return 0 if there's not enough data
+        return [0,0];  // Return 0 if there's not enough data
     }
 
     // Convert commit dates to timestamps and store in an array
