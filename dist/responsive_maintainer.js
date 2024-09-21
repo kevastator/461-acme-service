@@ -34,15 +34,12 @@ async function getResponsive(owner, repoName) {
     logger_1.default.debug("Calling GraphQL for commit timestamps");
     var response = await (0, graphql_request_1.graphqlRequest)(query);
     // Extract edges containing commit information
-    var edges = (_e = (_d = (_c = (_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.repository) === null || _b === void 0 ? void 0 : _b.defaultBranchRef) === null || _c === void 0 ? void 0 : _c.target) === null || _d === void 0 ? void 0 : _d.history) === null || _e === void 0 ? void 0 : _e.edges;
-    if (!edges || edges.length < 2) {
-        logger_1.default.debug("Not enough commit data to calculate average time between commits");
-        return [0, 0]; // Return 0 if there's not enough data
-    }
+    var edges = response?.data?.repository?.defaultBranchRef?.target?.history?.edges;
+  
     // Convert commit dates to timestamps and store in an array
     var commitTimestamps = [];
     for (var i = 0; i < edges.length; i++) {
-        var committedDate = (_g = (_f = edges[i]) === null || _f === void 0 ? void 0 : _f.node) === null || _g === void 0 ? void 0 : _g.committedDate;
+        var committedDate: string = edges[i]?.node?.committedDate;
         if (committedDate) {
             commitTimestamps.push(new Date(committedDate).getTime());
         }
@@ -64,6 +61,7 @@ async function getResponsive(owner, repoName) {
     var elapsed_time = (new Date().getTime() - start) / 1000;
     logger_1.default.infoDebug(`Successfully calculated average time between commits: ${avgTimeBetweenCommitsInHours.toFixed(2)} hours for ${owner}/${repoName} in ${elapsed_time}s`);
     console.log(avgTimeBetweenCommitsInHours);
-    return [avgTimeBetweenCommitsInHours, elapsed_time];
+
+    return avgTimeBetweenCommitsInHours;
 }
 getResponsive("expressjs", "express");
