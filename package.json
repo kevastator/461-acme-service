@@ -1,8 +1,9 @@
 {
   "devDependencies": {
     "@types/node": "^22.5.2",
+    "acorn": "^8.12.1",
+    "acorn-walk": "^8.3.4",
     "dotenv": "^16.4.5",
-    "halstead-metrics-cli": "^1.0.8",
     "typescript": "^5.5.4"
   },
   "name": "461-acme-service",
