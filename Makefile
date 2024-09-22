@@ -1,6 +1,7 @@
 # Variable for the I/O directories
 OUTDIR := dist
 SRCDIR := src
+TESTDIR := tests
 
 # Rule to compile/run the TypeScript file
 build-%:
@@ -10,6 +11,10 @@ build-%:
 run-%:
 	@ echo "Running $*..."
 	@ node $(OUTDIR)/$(basename $*).js
+
+run-tests:
+	@ echo "Running tests..."
+	@ npx jest $(TESTDIR)
 
 # Clean rule to remove the output directory
 clean:
@@ -21,6 +26,7 @@ endif
 
 install:
 	@ npm install --save-dev
+	@ npm install --save-dev @types/node @types/jest
 
 # Special rule to handle compiling and running a specified file
 %:
