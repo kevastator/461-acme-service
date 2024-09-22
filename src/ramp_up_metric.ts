@@ -18,7 +18,6 @@ try {                                                             // Run the met
 }
 */
 
-
 interface HalsteadMetrics {
     eta1: number; // Number of distinct operators
     eta2: number; // Number of distinct operands
@@ -27,13 +26,13 @@ interface HalsteadMetrics {
 }
 
 // Function to clone a GitHub repository into a directory
-function cloneGitHubRepo(url: string, targetDir: string): void {
+export function cloneGitHubRepo(url: string, targetDir: string): void {
     // Clone the repository into the target directory with depth 1 to only get the latest commit
     execSync(`git clone --depth 1 ${url} ${targetDir}`, { stdio: 'inherit' });
 }
 
 // Function to delete a directory recursively
-function deleteDirectoryRecursive(dirPath: string): void {
+export function deleteDirectoryRecursive(dirPath: string): void {
     if (fs.existsSync(dirPath)) {
         fs.readdirSync(dirPath).forEach((file) => {
             const currentPath = path.join(dirPath, file);
@@ -50,7 +49,7 @@ function deleteDirectoryRecursive(dirPath: string): void {
 }
 
 // Operators and operands tracking
-function calculateMetrics(content: string): HalsteadMetrics {
+export function calculateMetrics(content: string): HalsteadMetrics {
     const operatorsSet = new Set<string>();
     const operandsSet = new Set<string>();
     let N1 = 0; // Total operators count
@@ -95,7 +94,7 @@ function calculateMetrics(content: string): HalsteadMetrics {
     };
 }
 
-function calculateTimeToProgram(metrics: HalsteadMetrics): number {
+export function calculateTimeToProgram(metrics: HalsteadMetrics): number {
     const { eta1, eta2, N1, N2 } = metrics;
 
     // Program vocabulary: η = η1 + η2
@@ -122,7 +121,7 @@ function calculateTimeToProgram(metrics: HalsteadMetrics): number {
     return timeToProgram;
 }
 
-function getJavaScriptFiles(dir: string): string[] {
+export function getJavaScriptFiles(dir: string): string[] {
     let files: string[] = [];
 
     fs.readdirSync(dir).forEach(file => {
