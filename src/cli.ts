@@ -96,7 +96,8 @@ const analyzeRepository = async (repoUrl: string) => {
 
 
         // Output result to stdout
-        console.log(JSON.stringify(result));
+        //console.log(JSON.stringify(result));
+        console.log(JSON.stringify(result).replace(/,/g, ', '));
 
     } catch (error) {
         // Log the error

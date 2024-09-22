@@ -31,7 +31,7 @@ case "$1" in
     *)
         if [ -f "$1" ]; then
             URL_FILE=$1
-            echo "Analyzing repositories from $URL_FILE..."
+            #echo "Analyzing repositories from $URL_FILE..."
 
             while IFS= read -r repoUrl; do
                 # Call the CLI tool to analyze each repository and output NDJSON format
@@ -39,7 +39,8 @@ case "$1" in
             done < "$URL_FILE"
 
             if [ $? -eq 0 ]; then
-                echo "Analysis completed successfully."
+                #echo "Analysis completed successfully."
+                tail -n 1 analysis_output.ndjson
                 exit 0
             else
                 echo "Error during analysis."
