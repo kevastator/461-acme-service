@@ -3,6 +3,7 @@ import * as path from 'path';
 import { execSync } from 'child_process';  // To execute git commands
 import { parse } from 'acorn';
 import { simple as walkSimple } from 'acorn-walk';
+import logger from './logger';
 
 /*
 This general setup should work for implementation in CLI
@@ -13,9 +14,7 @@ const gitHubUrl = 'https://github.com/some-user/some-repo.git';  // Create some 
 
 try {                                                             // Run the metric
     const result = calculateTotalTimeFromRepo(gitHubUrl);
-    console.log(`Calculated metric: ${result}`);
 } catch (error) {
-    console.error('Failed to calculate metrics:', error);
 }
 */
 
@@ -145,7 +144,7 @@ export function calculateTotalTimeFromRepo(gitHubUrl: string): number {
 
     // Step 1: Clone the GitHub repository into 'analyze_repo'
     try {
-        console.log(`Cloning repository from ${gitHubUrl} into ${targetDir}...`);
+        logger.debug(`Cloning repository from ${gitHubUrl} into ${targetDir}...`);
         cloneGitHubRepo(gitHubUrl, targetDir);
 
         // Step 2: Perform the metric calculations
@@ -160,7 +159,7 @@ export function calculateTotalTimeFromRepo(gitHubUrl: string): number {
         });
 
         // Step 3: Clean up by deleting the cloned repository
-        console.log(`Cleaning up the cloned repository at ${targetDir}...`);
+        logger.debug(`Cleaning up the cloned repository at ${targetDir}...`);
         deleteDirectoryRecursive(targetDir);
 
         // Step 4: Return the result based on totalTime
@@ -171,7 +170,7 @@ export function calculateTotalTimeFromRepo(gitHubUrl: string): number {
         }
 
     } catch (error) {
-        console.error('An error occurred:', error);
+        logger.infoDebug('An error occurred!');
         deleteDirectoryRecursive(targetDir);  // Ensure cleanup even if an error occurs
         throw error;
     }
