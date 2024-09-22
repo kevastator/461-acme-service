@@ -89,7 +89,7 @@ const analyzeRepository = async (repoUrl: string) => {
             BusFactor_Latency: busFactorLatency.toFixed(3),
             ResponsiveMaintainer: responsiveMaintainer.toFixed(2),
             ResponsiveMaintainer_Latency: responsiveMaintainerLatency.toFixed(3),
-            License: license === 1 ? "Pass" : "Fail",
+            License: license.toFixed(2),
             License_Latency: licenseLatency.toFixed(3)
         };
 
@@ -116,8 +116,8 @@ const calculateNetScore = (busFactor: number, correctness: number, rampUp: numbe
 const args = process.argv.slice(2);
 
 if (args.length === 0) {
-    console.log("Please provide a repository URL as an argument, or enter interactive mode.");
-    console.log("Example: ./cli analyze <repository-url>");
+    logger.infoDebug("Please provide a repository URL as an argument, or enter interactive mode.");
+    logger.infoDebug("Example: ./cli analyze <repository-url>");
     startInteractiveMode();
 } else {
     const command = args[0];
@@ -126,7 +126,7 @@ if (args.length === 0) {
         const repoUrl = args[1];
         analyzeRepository(repoUrl);
     } else {
-        console.log("Invalid command or missing repository URL. Use './cli analyze <repository-url>' or run interactively.");
+        logger.infoDebug("Invalid command or missing repository URL. Use './cli analyze <repository-url>' or run interactively.");
         process.exit(1);
     }
 }
@@ -137,7 +137,7 @@ function startInteractiveMode() {
         if (input) {
             analyzeRepository(input);
         } else {
-            console.log("No repository URL provided.");
+            logger.infoDebug("No repository URL provided.");
         }
         cl.close();
     });
