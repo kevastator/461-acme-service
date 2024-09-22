@@ -22,6 +22,7 @@ const analyzeRepository = async (repoUrl: string) => {
         logger.info(`Starting analysis of repository: ${repoUrl}`);
 
         // Parse the URL using the urlParser to get the owner and repo name
+        var start:number = new Date().getTime();
         const [owner, repo] = await parseURL(repoUrl);
 
         if (!owner || !repo) {
@@ -79,18 +80,18 @@ const analyzeRepository = async (repoUrl: string) => {
         // Output the result in JSON format (for NDJSON)
         const result = {
             URL: repoUrl,
-            NetScore: netScore.toFixed(2),
-            NetScore_Latency: 0,  // Placeholder for overall latency calculation
-            RampUp: rampUp.toFixed(2),
-            RampUp_Latency: rampUpLatency.toFixed(3),
-            Correctness: correctness.toFixed(2),
-            Correctness_Latency: correctnessLatency.toFixed(3),
-            BusFactor: busFactor.toFixed(2),
-            BusFactor_Latency: busFactorLatency.toFixed(3),
-            ResponsiveMaintainer: responsiveMaintainer.toFixed(2),
-            ResponsiveMaintainer_Latency: responsiveMaintainerLatency.toFixed(3),
-            License: license.toFixed(2),
-            License_Latency: licenseLatency.toFixed(3)
+            NetScore: Number(netScore.toFixed(2)),
+            NetScore_Latency: Number(((new Date().getTime() - start) / 1000).toFixed(3)),  // Placeholder for overall latency calculation
+            RampUp: Number(rampUp.toFixed(2)),
+            RampUp_Latency: Number(rampUpLatency.toFixed(3)),
+            Correctness: Number(correctness.toFixed(2)),
+            Correctness_Latency: Number(correctnessLatency.toFixed(3)),
+            BusFactor: Number(busFactor.toFixed(2)),
+            BusFactor_Latency: Number(busFactorLatency.toFixed(3)),
+            ResponsiveMaintainer: Number(responsiveMaintainer.toFixed(2)),
+            ResponsiveMaintainer_Latency: Number(responsiveMaintainerLatency.toFixed(3)),
+            License: Number(license.toFixed(2)),
+            License_Latency: Number(licenseLatency.toFixed(3))
         };
 
 

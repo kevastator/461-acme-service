@@ -47,6 +47,7 @@ const analyzeRepository = async (repoUrl) => {
         // Log the start of the analysis
         logger_1.default.info(`Starting analysis of repository: ${repoUrl}`);
         // Parse the URL using the urlParser to get the owner and repo name
+        var start = new Date().getTime();
         const [owner, repo] = await (0, url_parse_1.parseURL)(repoUrl);
         if (!owner || !repo) {
             logger_1.default.info("Invalid URL or unsupported repository format.");
@@ -91,18 +92,18 @@ const analyzeRepository = async (repoUrl) => {
         // Output the result in JSON format (for NDJSON)
         const result = {
             URL: repoUrl,
-            NetScore: netScore.toFixed(2),
-            NetScore_Latency: 0, // Placeholder for overall latency calculation
-            RampUp: rampUp.toFixed(2),
-            RampUp_Latency: rampUpLatency.toFixed(3),
-            Correctness: correctness.toFixed(2),
-            Correctness_Latency: correctnessLatency.toFixed(3),
-            BusFactor: busFactor.toFixed(2),
-            BusFactor_Latency: busFactorLatency.toFixed(3),
-            ResponsiveMaintainer: responsiveMaintainer.toFixed(2),
-            ResponsiveMaintainer_Latency: responsiveMaintainerLatency.toFixed(3),
-            License: license.toFixed(2),
-            License_Latency: licenseLatency.toFixed(3)
+            NetScore: Number(netScore.toFixed(2)),
+            NetScore_Latency: Number(((new Date().getTime() - start) / 1000).toFixed(3)), // Placeholder for overall latency calculation
+            RampUp: Number(rampUp.toFixed(2)),
+            RampUp_Latency: Number(rampUpLatency.toFixed(3)),
+            Correctness: Number(correctness.toFixed(2)),
+            Correctness_Latency: Number(correctnessLatency.toFixed(3)),
+            BusFactor: Number(busFactor.toFixed(2)),
+            BusFactor_Latency: Number(busFactorLatency.toFixed(3)),
+            ResponsiveMaintainer: Number(responsiveMaintainer.toFixed(2)),
+            ResponsiveMaintainer_Latency: Number(responsiveMaintainerLatency.toFixed(3)),
+            License: Number(license.toFixed(2)),
+            License_Latency: Number(licenseLatency.toFixed(3))
         };
         // Output result to stdout
         console.log(JSON.stringify(result));
