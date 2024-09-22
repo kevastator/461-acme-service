@@ -144,7 +144,6 @@ function calculateTotalTimeFromRepo(gitHubUrl) {
         // Step 3: Clean up by deleting the cloned repository
         console.log(`Cleaning up the cloned repository at ${targetDir}...`);
         deleteDirectoryRecursive(targetDir);
-        console.log(totalTime);
         // Step 4: Return the result based on totalTime
         if (totalTime > time_max) {
             return 0;
@@ -158,12 +157,4 @@ function calculateTotalTimeFromRepo(gitHubUrl) {
         deleteDirectoryRecursive(targetDir); // Ensure cleanup even if an error occurs
         throw error;
     }
-}
-const gitHubUrl = 'https://github.com/kevastator/461-acme-service.git';
-try { // Run the metric
-    const result = calculateTotalTimeFromRepo(gitHubUrl);
-    console.log(`Calculated metric: ${result}`);
-}
-catch (error) {
-    console.error('Failed to calculate metrics:', error);
 }

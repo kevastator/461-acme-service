@@ -59,7 +59,10 @@ async function getCorrectness(owner, repoName) {
         dict[state] += 1;
     }
     // Calculate the correctness
-    var score = dict["CLOSED"] / (dict["OPEN"] + dict["CLOSED"]);
+    var score = 0;
+    if ((dict["CLOSED"] + dict["OPEN"]) > 0) {
+        score = dict["CLOSED"] / (dict["OPEN"] + dict["CLOSED"]);
+    }
     // get the elapsed time in seconds (divide by 1000)
     var elapsed_time = (new Date().getTime() - start) / 1000;
     logger_1.default.infoDebug(`Successfully calculated Correctness of ${score} for ${owner}/${repoName} in ${elapsed_time}s`);

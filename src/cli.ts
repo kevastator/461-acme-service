@@ -22,6 +22,7 @@ const analyzeRepository = async (repoUrl: string) => {
         logger.info(`Starting analysis of repository: ${repoUrl}`);
 
         // Parse the URL using the urlParser to get the owner and repo name
+        var start:number = new Date().getTime();
         const [owner, repo] = await parseURL(repoUrl);
 
         if (!owner || !repo) {
@@ -79,18 +80,18 @@ const analyzeRepository = async (repoUrl: string) => {
         // Output the result in JSON format (for NDJSON)
         const result = {
             URL: repoUrl,
-            NetScore: netScore.toFixed(2),
-            NetScore_Latency: 0,  // Placeholder for overall latency calculation
-            RampUp: rampUp.toFixed(2),
-            RampUp_Latency: rampUpLatency.toFixed(3),
-            Correctness: correctness.toFixed(2),
-            Correctness_Latency: correctnessLatency.toFixed(3),
-            BusFactor: busFactor.toFixed(2),
-            BusFactor_Latency: busFactorLatency.toFixed(3),
-            ResponsiveMaintainer: responsiveMaintainer.toFixed(2),
-            ResponsiveMaintainer_Latency: responsiveMaintainerLatency.toFixed(3),
-            License: license === 1 ? "Pass" : "Fail",
-            License_Latency: licenseLatency.toFixed(3)
+            NetScore: Number(netScore.toFixed(2)),
+            NetScore_Latency: Number(((new Date().getTime() - start) / 1000).toFixed(3)),  // Placeholder for overall latency calculation
+            RampUp: Number(rampUp.toFixed(2)),
+            RampUp_Latency: Number(rampUpLatency.toFixed(3)),
+            Correctness: Number(correctness.toFixed(2)),
+            Correctness_Latency: Number(correctnessLatency.toFixed(3)),
+            BusFactor: Number(busFactor.toFixed(2)),
+            BusFactor_Latency: Number(busFactorLatency.toFixed(3)),
+            ResponsiveMaintainer: Number(responsiveMaintainer.toFixed(2)),
+            ResponsiveMaintainer_Latency: Number(responsiveMaintainerLatency.toFixed(3)),
+            License: Number(license.toFixed(2)),
+            License_Latency: Number(licenseLatency.toFixed(3))
         };
 
 
@@ -116,8 +117,8 @@ const calculateNetScore = (busFactor: number, correctness: number, rampUp: numbe
 const args = process.argv.slice(2);
 
 if (args.length === 0) {
-    console.log("Please provide a repository URL as an argument, or enter interactive mode.");
-    console.log("Example: ./cli analyze <repository-url>");
+    logger.infoDebug("Please provide a repository URL as an argument, or enter interactive mode.");
+    logger.infoDebug("Example: ./cli analyze <repository-url>");
     startInteractiveMode();
 } else {
     const command = args[0];
@@ -126,7 +127,7 @@ if (args.length === 0) {
         const repoUrl = args[1];
         analyzeRepository(repoUrl);
     } else {
-        console.log("Invalid command or missing repository URL. Use './cli analyze <repository-url>' or run interactively.");
+        logger.infoDebug("Invalid command or missing repository URL. Use './cli analyze <repository-url>' or run interactively.");
         process.exit(1);
     }
 }
@@ -137,7 +138,7 @@ function startInteractiveMode() {
         if (input) {
             analyzeRepository(input);
         } else {
-            console.log("No repository URL provided.");
+            logger.infoDebug("No repository URL provided.");
         }
         cl.close();
     });
