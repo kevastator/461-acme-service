@@ -59,8 +59,7 @@ const analyzeRepository = async (repoUrl: string) => {
 
         // Ramp-Up 
         logger.debug(`Calculating Ramp-Up Time for ${owner}/${repo}`);
-        const rampUp = calculateTotalTimeFromRepo(`https://github.com/${owner}/${repo}`);
-        const rampUpLatency = 0; // Placeholder if no latency is calculated
+        const [rampUp, rampUpLatency] = calculateTotalTimeFromRepo(`https://github.com/${owner}/${repo}`);
 
         // Responsive Maintainer
         logger.debug(`Calculating Responsive Maintainer Score for ${owner}/${repo}`);
