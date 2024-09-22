@@ -22,6 +22,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.calculateTotalTimeFromRepo = calculateTotalTimeFromRepo;
 const fs = __importStar(require("fs"));
@@ -29,6 +32,7 @@ const path = __importStar(require("path"));
 const child_process_1 = require("child_process"); // To execute git commands
 const acorn_1 = require("acorn");
 const acorn_walk_1 = require("acorn-walk");
+const logger_1 = __importDefault(require("./logger"));
 // Function to clone a GitHub repository into a directory
 function cloneGitHubRepo(url, targetDir) {
     // Clone the repository into the target directory with depth 1 to only get the latest commit
@@ -130,7 +134,7 @@ function calculateTotalTimeFromRepo(gitHubUrl) {
     const time_max = 100; // Locally defined time_max
     // Step 1: Clone the GitHub repository into 'analyze_repo'
     try {
-        console.log(`Cloning repository from ${gitHubUrl} into ${targetDir}...`);
+        logger_1.default.debug(`Cloning repository from ${gitHubUrl} into ${targetDir}...`);
         cloneGitHubRepo(gitHubUrl, targetDir);
         // Step 2: Perform the metric calculations
         const jsFiles = getJavaScriptFiles(targetDir);
@@ -142,7 +146,7 @@ function calculateTotalTimeFromRepo(gitHubUrl) {
             totalTime += time;
         });
         // Step 3: Clean up by deleting the cloned repository
-        console.log(`Cleaning up the cloned repository at ${targetDir}...`);
+        logger_1.default.debug(`Cleaning up the cloned repository at ${targetDir}...`);
         deleteDirectoryRecursive(targetDir);
         // Step 4: Return the result based on totalTime
         if (totalTime > time_max) {
@@ -153,7 +157,7 @@ function calculateTotalTimeFromRepo(gitHubUrl) {
         }
     }
     catch (error) {
-        console.error('An error occurred:', error);
+        logger_1.default.infoDebug('An error occurred!');
         deleteDirectoryRecursive(targetDir); // Ensure cleanup even if an error occurs
         throw error;
     }
