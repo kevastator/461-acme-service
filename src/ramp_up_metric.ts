@@ -164,7 +164,7 @@ export function calculateTotalTimeFromRepo(gitHubUrl: string): [number, number] 
 
         // Step 4: Measure end time and calculate latency
         const endTime = performance.now(); // End time for latency measurement
-        const latency = endTime - startTime; // Calculate latency in milliseconds
+        const latency = (endTime - startTime) / 1000; // Calculate latency in seconds
 
         // Step 5: Return the result based on totalTime and latency
         if (totalTime > time_max) {
