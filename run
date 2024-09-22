@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Check for the first argument (the command)
+case "$1" in
+
+    # Install dependencies
+    "install")
+        echo "Installing dependencies..."
+        npm install
+        if [ $? -eq 0 ]; then
+            exit 0
+        else
+            echo "Error installing dependencies."
+            exit 1
+        fi
+        ;;
+
+    # Analyze the URLs provided in the URL_FILE
+    *)
+        if [ -f "$1" ]; then
+            URL_FILE=$1
+            echo "Analyzing repositories from $URL_FILE..."
+
+            while IFS= read -r repoUrl; do
+                # Call the CLI tool to analyze each repository and output NDJSON format
+                node ./dist/cli.js analyze $repoUrl >> analysis_output.ndjson
+            done < "$URL_FILE"
+
+            if [ $? -eq 0 ]; then
+                echo "Analysis completed successfully."
+                exit 0
+            else
+                echo "Error during analysis."
+                exit 1
+            fi
+        else
+            echo "Invalid command or missing URL_FILE."
+            exit 1
+        fi
+        ;;
+
+    # Run tests
+    "test")
+        echo "Running test suite..."
+        npm test
+        if [ $? -eq 0 ]; then
+            echo "All tests passed successfully."
+            exit 0
+        else
+            echo "Tests failed."
+            exit 1
+        fi
+        ;;
+
+    *)
+        echo "Invalid command. Use './run install', './run <URL_FILE>', or './run test'."
+        exit 1
+        ;;
+esac
