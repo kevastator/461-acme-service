@@ -2,3 +2,4 @@
 src/sandbox.ts
 node_modules
 logs
+coverage

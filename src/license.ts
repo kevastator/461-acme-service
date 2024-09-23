@@ -75,8 +75,9 @@ export async function getLicense(owner: string, repoName: string): Promise<numbe
 
     return [score, elapsed_time];
 }
-
+/*
 getLicense("expressjs", "express");
 getLicense("cloudinary", "cloudinary_npm");
 getLicense("lodash", "lodash");
 getLicense("nullivex", "nodist");
+*/

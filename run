@@ -16,10 +16,21 @@ case "$1" in
 
     # Run tests
     "test")
-        echo "Running test suite..."
-        npm test
+        #echo "Running test suite..."
+        #jest --silent --coverage --json --outputFile=jest-results.json > jest-output.txt
+        npm test > /dev/null 2>&1
+
+        passed_tests=$(jq '.numPassedTests' jest-results.json)
+        total_tests=$(jq '.numTotalTests' jest-results.json)
+        line_coverage=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+        int_coverage=$(echo "$line_coverage / 1" | bc)
+        echo "Total: $total_tests" 
+        echo "Passed: $passed_tests" 
+        echo "Coverage: $int_coverage%"
+        echo "$passed_tests/$total_tests test cases passed. $int_coverage% line coverage achieved."
+        #console.log('{$testCasesPassed}/${totalTestCases} test cases passed. ${roundedLineCoverage}% line coverage achieved');
         if [ $? -eq 0 ]; then
-            echo "All tests passed successfully."
+            #echo "All tests passed successfully."
             exit 0
         else
             echo "Tests failed."

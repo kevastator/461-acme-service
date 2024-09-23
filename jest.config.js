@@ -1,11 +1,24 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
-  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  testPathIgnorePatterns: ['/dist/'], // Ignore compiled files
+  collectCoverage: true, // Enable coverage collection
+  coverageDirectory: 'coverage', // Output directory for coverage reports
+  collectCoverageFrom: [
+    'src/**/*.{js,ts}', // Include all JS and TS files in the src directory
+    '!src/**/*.d.ts', // Exclude TypeScript definition files
+    '!src/run.ts' // exclude main entrypoint.
+  ],
   transform: {
-      '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': 'ts-jest'
   },
-  collectCoverage: true,
-  coverageDirectory: 'coverage',
+  coverageReporters: ["json", "json-summary"],
+  moduleFileExtensions: ['ts', 'js'],
+  testMatch: ['**/*.test.ts'],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
+    },
+  },
+  silent: true
 };
