@@ -8,6 +8,7 @@
     "typescript": "^5.5.4"
   },
   "name": "461-acme-service",
+  "homepage": "https://github.com/kevastator/461-acme-service",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
